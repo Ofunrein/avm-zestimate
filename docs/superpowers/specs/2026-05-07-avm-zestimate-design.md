@@ -1,7 +1,7 @@
 # AVM Zestimate — Design Spec
 **Date:** 2026-05-07  
 **Market:** Austin TX  
-**Goal:** Beat Zillow's published Austin MedAPE (~4.5%) on a held-out test set. Deploy publicly with benchmark dashboard.  
+**Goal:** Build a production-grade hyperlocal Austin AVM with temporal validation, prediction intervals, SHAP explainability, comparable sales retrieval, residual analysis, MLflow tracking, CI, and a deployed investor dashboard for identifying potentially undervalued properties. Benchmark against tax appraisal, ZIP median, price-per-square-foot, and Zillow's published MedAPE ranges as external context — not a direct property-level comparison.  
 **Cost target:** $0 (Vercel Hobby + HuggingFace Spaces free + Supabase free tier)
 
 ---
@@ -116,7 +116,20 @@ avm-zestimate/
 - `confidence_score` — 0–100, derived from interval width relative to price
 - `shap_values` — top 5 features with direction and magnitude
 
-**Win condition:** MedAPE < 4.0% on held-out 2024 test set (Zillow Austin baseline: ~4.5%)
+**Win condition:** MedAPE < 4.0% on held-out 2024 test set. Zillow's published Austin MedAPE (~4.5%) shown as external reference only — not a direct property-level comparison.
+
+**Implementation order (model first, packaging second):**
+1. Get Austin property + sale dataset
+2. Build clean temporal split
+3. Train baseline → XGBoost → LightGBM
+4. Residual analysis
+5. Prediction intervals
+6. SHAP
+7. Comparable sales engine
+8. MLflow experiment tracking
+9. FastAPI on HuggingFace Spaces
+10. Next.js dashboard on Vercel
+11. CI + model card
 
 **Experiment tracking:** MLflow (local), log: params, CV MedAPE, test MedAPE, model artifact path, training data SHA256
 
@@ -182,10 +195,7 @@ POST /scan
 - Output: predicted price card, confidence interval bar, SHAP waterfall chart, comps table  
 - Below fold: "Is this over or underpriced?" badge based on value_gap vs current Zillow estimate
 
-`/benchmark` — Accuracy dashboard  
-- Model MedAPE vs Zillow baseline (bar chart)  
-- Table: accuracy by ZIP code (MedAPE, MAE, n_sales)  
-- Training data summary: n records, date range, data sources
+**Benchmark dashboard** — MedAPE vs tax appraisal baseline, ZIP median baseline, PPSF baseline, and ensemble. Zillow's published MedAPE shown as external reference.
 
 `/scanner` — Undervalued detector  
 - CSV upload (address, list_price, sqft, beds, baths, year_built)  
@@ -246,9 +256,13 @@ Row limit on free tier: 500MB storage, ~50k rows predictions before cleanup need
 
 | Metric | Target |
 |--------|--------|
-| MedAPE on 2024 test set | < 4.0% (beats Zillow ~4.5%) |
+| MedAPE on 2024 test set | < 4.0% |
 | Within 5% | > 60% of predictions |
 | Within 10% | > 85% of predictions |
+| Beats tax appraisal MedAPE | Yes (measured on same test set) |
+| Beats ZIP median MedAPE | Yes |
+| Beats PPSF baseline MedAPE | Yes |
+| Zillow published ~4.5% MedAPE | Shown as external reference |
 | API p95 latency | < 2s (excluding cold start) |
 | Frontend Lighthouse score | > 90 |
 | Public URL live | Yes |
