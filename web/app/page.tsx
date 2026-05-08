@@ -84,6 +84,7 @@ export default function HomePage() {
           <nav className="flex gap-4 mt-4 text-sm">
             <a href="/benchmark" className="text-emerald-600 hover:underline">Benchmark Dashboard</a>
             <a href="/scanner" className="text-emerald-600 hover:underline">Undervalued Scanner</a>
+            <a href="/deals" className="text-emerald-600 hover:underline">Deal Monitor</a>
             <a href="/model-card" className="text-emerald-600 hover:underline">Model Card</a>
           </nav>
         </div>
