@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev/implementation]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ml-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install uv
+        run: pip install uv
+      - run: sudo apt-get update && sudo apt-get install -y libgomp1
+      - name: Install ML deps
+        run: cd ml && uv pip install -e ".[dev]" --system
+      - name: Run ML tests
+        run: cd ml && python -m pytest tests/ -v --tb=short
+
+  web-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: web/package-lock.json
+      - name: Install web deps
+        run: cd web && npm ci
+      - name: TypeScript check + Build
+        run: cd web && npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:7860
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder

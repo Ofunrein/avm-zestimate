@@ -1,0 +1,12 @@
+fastapi>=0.111
+uvicorn[standard]>=0.29
+pydantic>=2.7
+xgboost>=2.0
+lightgbm>=4.3
+shap>=0.44
+pandas>=2.0
+numpy>=1.26
+scikit-learn>=1.4
+joblib>=1.4
+huggingface-hub>=0.23
+protobuf==3.20.3

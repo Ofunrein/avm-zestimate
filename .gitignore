@@ -1,0 +1,14 @@
+ml/data/
+ml/models/
+ml/mlruns/
+mlruns/
+.DS_Store
+**/.DS_Store
+__pycache__/
+*.pyc
+.env
+.env.local
+node_modules/
+.next/
+*.egg-info/
+.venv/
