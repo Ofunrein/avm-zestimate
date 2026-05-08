@@ -43,7 +43,7 @@ export default async function BenchmarkPage() {
         </div>
 
         {/* Stats grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 1, marginBottom: 18, border: '1px solid var(--line)', background: 'var(--line)' }}>
+        <div className="grid-stats-6">
           {stats.map(({ label, value, gold }) => (
             <div key={label} className="panel" style={{ padding: '16px 14px', border: 'none', background: 'var(--bg-1)' }}>
               <div className="t-eyebrow" style={{ marginBottom: 6 }}>{label}</div>

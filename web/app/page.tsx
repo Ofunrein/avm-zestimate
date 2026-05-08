@@ -77,15 +77,7 @@ export default function HomePage() {
   return (
     <main style={{ minHeight: '100vh', background: 'var(--bg)', padding: '0 0 64px' }}>
       {/* Top bar */}
-      <div style={{
-        borderBottom: '1px solid var(--line)',
-        background: 'var(--bg-1)',
-        padding: '0 28px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 24,
-        height: 44,
-      }}>
+      <div className="topbar">
         <span className="t-display" style={{ fontSize: 13, color: 'var(--gold)', letterSpacing: '0.08em' }}>AVM</span>
         <div style={{ width: 1, height: 20, background: 'var(--line-2)' }} />
         <nav style={{ display: 'flex', gap: 2 }}>
@@ -118,9 +110,9 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1080, margin: '0 auto', padding: '32px 28px 0' }}>
+      <div className="page-container">
         {/* Page heading */}
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 24 }}>
+        <div className="page-heading-row">
           <div>
             <div className="t-eyebrow" style={{ marginBottom: 8 }}>SECTION 01 · HYPERLOCAL VALUATION ENGINE · AUSTIN TX</div>
             <h1 className="t-display" style={{ fontSize: 40, margin: 0, color: 'var(--ink)', lineHeight: 0.95 }}>
@@ -128,7 +120,7 @@ export default function HomePage() {
               <span style={{ color: 'var(--gold)', fontStyle: 'italic' }}>price.</span>
             </h1>
           </div>
-          <div style={{ display: 'flex', gap: 24, alignItems: 'flex-end' }}>
+          <div className="page-heading-stats">
             <div style={{ textAlign: 'right' }}>
               <div className="t-eyebrow">MEDAPE</div>
               <div className="t-mono" style={{ fontSize: 20, color: 'var(--gold)' }}>12.67%</div>
@@ -160,7 +152,7 @@ export default function HomePage() {
         ) : (
           <>
             {/* Two-column: form + result */}
-            <div style={{ display: 'grid', gridTemplateColumns: result ? '360px 1fr' : '1fr', gap: 18, marginBottom: 18 }}>
+            <div className={result ? "grid-form-result" : ""} style={{ marginBottom: 18 }}>
               {/* Form */}
               <div className="panel tick-corners scanlines">
                 <div className="panel-head">
@@ -169,7 +161,7 @@ export default function HomePage() {
                   <span className="panel-meta">8 FIELDS · &lt;200ms</span>
                 </div>
                 <form onSubmit={handleSubmit} style={{ padding: '16px 16px 20px' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div className="form-grid">
                     {FIELDS.map(([key, label, type]) => (
                       <div key={key}>
                         <div className="term-label">{label}</div>
@@ -207,7 +199,7 @@ export default function HomePage() {
 
             {/* SHAP + AI row */}
             {result && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 18, marginBottom: 18 }}>
+              <div className="grid-shap-ai">
                 <ShapWaterfall features={result.shap_top5} />
                 <ExplanationCard
                   prediction={result}

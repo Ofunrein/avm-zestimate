@@ -27,7 +27,7 @@ export function SearchResults({ results, total, query, onClear }: Props) {
           <p className="t-eyebrow">NO MATCHING PROPERTIES · TRY ADJUSTING QUERY</p>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
+        <div className="grid-search-results">
           {results.map((r) => (
             <div key={r.id} className="panel tick-corners scanlines" style={{ padding: 0 }}>
               <div style={{ padding: '14px 14px 12px' }}>

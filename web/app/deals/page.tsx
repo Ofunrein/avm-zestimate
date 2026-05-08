@@ -40,7 +40,7 @@ export default async function DealsPage() {
             </p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 18 }}>
+          <div className="grid-deals">
             {deals.map((deal) => (
               <DealCard key={deal.id} deal={deal} />
             ))}
