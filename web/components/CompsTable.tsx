@@ -7,32 +7,29 @@ const fmt = (n: number) =>
 export function CompsTable({ comps }: { comps: CompProperty[] }) {
   if (!comps.length) return null;
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
-      <div className="px-6 py-4 border-b border-zinc-100">
-        <h3 className="text-sm font-semibold text-zinc-700">Comparable Sales</h3>
+    <div className="rounded-xl border overflow-hidden" style={{ background: "var(--surface)", borderColor: "var(--border)" }}>
+      <div className="px-5 py-3 border-b" style={{ borderColor: "var(--border)" }}>
+        <p className="text-xs uppercase tracking-widest" style={{ color: "var(--text-subtle)" }}>Comparable Sales</p>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-zinc-50 text-zinc-500 uppercase text-xs">
-            <tr>
-              <th className="px-4 py-3 text-left">Address</th>
-              <th className="px-4 py-3 text-right">Sale Price</th>
-              <th className="px-4 py-3 text-right">Sqft</th>
-              <th className="px-4 py-3 text-right">Beds/Bath</th>
-              <th className="px-4 py-3 text-right">Distance</th>
-              <th className="px-4 py-3 text-right">Match</th>
+        <table className="w-full text-xs">
+          <thead>
+            <tr style={{ borderBottom: "1px solid var(--border)" }}>
+              {["Address", "Sale Price", "Sqft", "Bed/Bath", "Dist", "Match"].map(h => (
+                <th key={h} className="px-4 py-2.5 text-left font-medium uppercase tracking-wide" style={{ color: "var(--text-subtle)" }}>{h}</th>
+              ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100">
+          <tbody>
             {comps.map((c, i) => (
-              <tr key={i} className="hover:bg-zinc-50">
-                <td className="px-4 py-3 text-zinc-700">{c.address ?? "—"}</td>
-                <td className="px-4 py-3 text-right font-medium">{fmt(c.sale_price)}</td>
-                <td className="px-4 py-3 text-right">{c.sqft_living?.toLocaleString()}</td>
-                <td className="px-4 py-3 text-right">{c.beds ?? "—"} / {c.bath_total ?? "—"}</td>
-                <td className="px-4 py-3 text-right">{c.distance_miles?.toFixed(2) ?? "—"} mi</td>
-                <td className="px-4 py-3 text-right">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
+              <tr key={i} className="group" style={{ borderBottom: i < comps.length - 1 ? "1px solid var(--border)" : "none" }}>
+                <td className="px-4 py-3" style={{ color: "var(--text-muted)" }}>{c.address ?? "—"}</td>
+                <td className="px-4 py-3 tabular-nums font-medium" style={{ color: "var(--text-primary)" }}>{fmt(c.sale_price)}</td>
+                <td className="px-4 py-3 tabular-nums" style={{ color: "var(--text-muted)" }}>{c.sqft_living?.toLocaleString()}</td>
+                <td className="px-4 py-3" style={{ color: "var(--text-muted)" }}>{c.beds ?? "—"}/{c.bath_total ?? "—"}</td>
+                <td className="px-4 py-3 tabular-nums" style={{ color: "var(--text-muted)" }}>{c.distance_miles?.toFixed(2) ?? "—"} mi</td>
+                <td className="px-4 py-3">
+                  <span className="px-2 py-0.5 rounded text-xs font-medium tabular-nums" style={{ background: "var(--accent-dim)", color: "var(--accent)" }}>
                     {(c.similarity_score * 100).toFixed(0)}%
                   </span>
                 </td>
