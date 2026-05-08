@@ -112,3 +112,91 @@ export async function scanProperties(
   if (!res.ok) throw new Error(await res.text());
   return res.json();
 }
+
+export interface ExplainRequest {
+  predicted_price: number;
+  lower_bound: number;
+  upper_bound: number;
+  confidence_score: number;
+  shap_top5: ShapFeature[];
+  zip_code: string;
+  sqft_living: number;
+  beds: number;
+  baths_full: number;
+  year_built: number;
+  neighborhood_context?: string;
+}
+
+export async function explainPrediction(req: ExplainRequest): Promise<string> {
+  const res = await fetch(`${API_BASE}/explain`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(req),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  const data = await res.json();
+  return data.explanation as string;
+}
+
+export interface SearchResult {
+  id: string;
+  address?: string;
+  zip_code?: string;
+  sqft_living?: number;
+  beds?: number;
+  baths_full?: number;
+  year_built?: number;
+  predicted_price: number;
+  list_price?: number;
+  value_gap_pct?: number;
+  confidence_score: number;
+  shap_top_driver?: string;
+  created_at?: string;
+}
+
+export interface SearchResponse {
+  results: SearchResult[];
+  query_parsed: Record<string, unknown>;
+  total: number;
+}
+
+export async function searchProperties(query: string): Promise<SearchResponse> {
+  const res = await fetch(`${API_BASE}/search`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query }),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+export interface DealItem {
+  id: string;
+  address?: string;
+  zip_code?: string;
+  list_price?: number;
+  predicted_price: number;
+  value_gap_pct: number;
+  confidence_score: number;
+  beds?: number;
+  baths_full?: number;
+  sqft_living?: number;
+  year_built?: number;
+  photo_url?: string;
+  condition_note?: string;
+  shap_top_driver?: string;
+  deal_score?: number;
+  created_at?: string;
+}
+
+export async function getDeals(params?: {
+  zip_code?: string;
+  min_gap?: number;
+}): Promise<DealItem[]> {
+  const qs = new URLSearchParams();
+  if (params?.zip_code) qs.set("zip_code", params.zip_code);
+  if (params?.min_gap) qs.set("min_gap", String(params.min_gap));
+  const res = await fetch(`${API_BASE}/deals?${qs}`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}

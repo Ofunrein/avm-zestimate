@@ -4,6 +4,7 @@ import { predict, getComps, PredictionResponse, CompProperty } from "@/lib/api";
 import { PredictionCard } from "@/components/PredictionCard";
 import { ShapWaterfall } from "@/components/ShapWaterfall";
 import { CompsTable } from "@/components/CompsTable";
+import { ExplanationCard } from "@/components/ExplanationCard";
 
 const DEFAULT = {
   sqft_living: 1800, beds: 3, baths_full: 2, baths_half: 0,
@@ -87,6 +88,14 @@ export default function HomePage() {
           <div className="space-y-6">
             <PredictionCard result={result} />
             <ShapWaterfall features={result.shap_top5} />
+            <ExplanationCard
+              prediction={result}
+              zipCode={form.zip_code}
+              sqft={form.sqft_living}
+              beds={form.beds}
+              baths={form.baths_full}
+              yearBuilt={form.year_built}
+            />
             <CompsTable comps={comps} />
           </div>
         )}
