@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 import mlflow
 
-MLFLOW_TRACKING_URI = str(Path(__file__).parents[3] / "mlruns")
+MLFLOW_TRACKING_URI = str(Path(__file__).parents[2] / "mlruns")
 
 
 def setup_mlflow(experiment_name: str = "austin-avm") -> None:

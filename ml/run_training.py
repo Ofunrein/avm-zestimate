@@ -20,7 +20,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from avm.clean import clean, data_sha256
+from avm.clean import clean, data_sha256, normalise_kaggle
 from avm.evaluate import metrics, residual_summary
 from avm.experiment import log_run
 from avm.features import (
@@ -44,6 +44,7 @@ def main():
     # 1. Load + clean
     print("[1/9] Loading data...")
     raw = load_kaggle_austin()
+    raw = normalise_kaggle(raw)
     df = clean(raw)
     print(f"  Clean records: {len(df):,}")
 
@@ -59,7 +60,7 @@ def main():
 
     # 3. Split
     print("[3/9] Temporal split...")
-    train_df, test_df = train_test_split_temporal(df, test_start="2024-01-01")
+    train_df, test_df = train_test_split_temporal(df, test_start="2020-07-01")
     folds = temporal_cv_folds(train_df, n_folds=5)
     print(f"  Train: {len(train_df):,} | Test: {len(test_df):,} | CV folds: {len(folds)}")
 

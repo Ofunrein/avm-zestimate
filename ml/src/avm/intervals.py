@@ -5,7 +5,7 @@ import pandas as pd
 import xgboost as xgb
 from pathlib import Path
 
-MODELS_DIR = Path(__file__).parents[3] / "models"
+MODELS_DIR = Path(__file__).parents[2] / "models"
 
 
 def train_quantile_models(

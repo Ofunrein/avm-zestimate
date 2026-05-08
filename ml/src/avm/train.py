@@ -18,7 +18,7 @@ from avm.split import temporal_cv_folds
 LOG = logging.getLogger(__name__)
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 
-MODELS_DIR = Path(__file__).parents[3] / "models"
+MODELS_DIR = Path(__file__).parents[2] / "models"
 
 
 def _cv_medape(model_cls, params: dict, folds, log_target: bool = True) -> float:

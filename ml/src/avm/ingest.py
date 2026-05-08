@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pandas as pd
 
-RAW = Path(__file__).parents[3] / "data/raw"
-PROCESSED = Path(__file__).parents[3] / "data/processed"
+RAW = Path(__file__).parents[2] / "data/raw"
+PROCESSED = Path(__file__).parents[2] / "data/processed"
 
 KAGGLE_DATASET = "ericpierce/austinhousingprices"
 NUMBERS_PATH = Path.home() / "Downloads/compass_austin_listings.numbers"
