@@ -14,6 +14,17 @@ const DEFAULT = {
   lot_sqft: 5000, garage_spaces: 1, has_pool: 0, assessed_value: 0,
 };
 
+const FIELDS: Array<[keyof typeof DEFAULT, string, string, string?]> = [
+  ["sqft_living",    "01 · LIVING SQFT",   "number"],
+  ["lot_sqft",       "02 · LOT SQFT",       "number"],
+  ["beds",           "03 · BEDS",           "number"],
+  ["baths_full",     "04 · FULL BATHS",     "number"],
+  ["year_built",     "05 · YEAR BUILT",     "number"],
+  ["zip_code",       "06 · ZIP CODE",       "text"],
+  ["lat",            "07 · LAT",            "number"],
+  ["lng",            "08 · LNG",            "number"],
+];
+
 export default function HomePage() {
   const [form, setForm] = useState(DEFAULT);
   const [result, setResult] = useState<PredictionResponse | null>(null);
@@ -63,84 +74,155 @@ export default function HomePage() {
     setSearchResults([]);
   };
 
-  const field = (key: keyof typeof DEFAULT, label: string, type = "number") => (
-    <div key={key}>
-      <label className="block text-xs text-zinc-500 mb-1">{label}</label>
-      <input
-        type={type}
-        value={form[key]}
-        onChange={(e) => setForm((f) => ({ ...f, [key]: type === "number" ? Number(e.target.value) : e.target.value }))}
-        className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
-      />
-    </div>
-  );
-
   return (
-    <main className="min-h-screen bg-zinc-50">
-      <div className="max-w-5xl mx-auto px-4 py-12">
-        <div className="mb-10">
-          <h1 className="text-3xl font-bold text-zinc-900">Austin AVM</h1>
-          <p className="text-zinc-500 mt-1">Hyperlocal home valuation for Austin, TX · Temporal CV · SHAP explained</p>
-          <nav className="flex gap-4 mt-4 text-sm">
-            <a href="/benchmark" className="text-emerald-600 hover:underline">Benchmark Dashboard</a>
-            <a href="/scanner" className="text-emerald-600 hover:underline">Undervalued Scanner</a>
-            <a href="/deals" className="text-emerald-600 hover:underline">Deal Monitor</a>
-            <a href="/model-card" className="text-emerald-600 hover:underline">Model Card</a>
-          </nav>
+    <main style={{ minHeight: '100vh', background: 'var(--bg)', padding: '0 0 64px' }}>
+      {/* Top bar */}
+      <div style={{
+        borderBottom: '1px solid var(--line)',
+        background: 'var(--bg-1)',
+        padding: '0 28px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 24,
+        height: 44,
+      }}>
+        <span className="t-display" style={{ fontSize: 13, color: 'var(--gold)', letterSpacing: '0.08em' }}>AVM</span>
+        <div style={{ width: 1, height: 20, background: 'var(--line-2)' }} />
+        <nav style={{ display: 'flex', gap: 2 }}>
+          {[
+            ['/', 'VALUATION'],
+            ['/benchmark', 'BENCHMARK'],
+            ['/scanner', 'SCANNER'],
+            ['/deals', 'DEALS'],
+            ['/model-card', 'MODEL CARD'],
+          ].map(([href, label]) => (
+            <a key={href} href={href} style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 10.5,
+              letterSpacing: '0.16em',
+              color: href === '/' ? 'var(--gold)' : 'var(--mute)',
+              padding: '0 12px',
+              height: 44,
+              display: 'flex',
+              alignItems: 'center',
+              borderBottom: href === '/' ? '2px solid var(--gold)' : '2px solid transparent',
+              textDecoration: 'none',
+            }}>{label}</a>
+          ))}
+        </nav>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="pill">
+            <div className="pill-pulse" />
+            LIVE · AUSTIN TX
+          </div>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: 1080, margin: '0 auto', padding: '32px 28px 0' }}>
+        {/* Page heading */}
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 24 }}>
+          <div>
+            <div className="t-eyebrow" style={{ marginBottom: 8 }}>SECTION 01 · HYPERLOCAL VALUATION ENGINE · AUSTIN TX</div>
+            <h1 className="t-display" style={{ fontSize: 40, margin: 0, color: 'var(--ink)', lineHeight: 0.95 }}>
+              Tell us what to{' '}
+              <span style={{ color: 'var(--gold)', fontStyle: 'italic' }}>price.</span>
+            </h1>
+          </div>
+          <div style={{ display: 'flex', gap: 24, alignItems: 'flex-end' }}>
+            <div style={{ textAlign: 'right' }}>
+              <div className="t-eyebrow">MEDAPE</div>
+              <div className="t-mono" style={{ fontSize: 20, color: 'var(--gold)' }}>12.67%</div>
+            </div>
+            <div style={{ width: 1, height: 32, background: 'var(--line-2)' }} />
+            <div style={{ textAlign: 'right' }}>
+              <div className="t-eyebrow">WITHIN 10%</div>
+              <div className="t-mono" style={{ fontSize: 20, color: 'var(--ink)' }}>45.2%</div>
+            </div>
+            <div style={{ width: 1, height: 32, background: 'var(--line-2)' }} />
+            <div style={{ textAlign: 'right' }}>
+              <div className="t-eyebrow">TEST SET</div>
+              <div className="t-mono" style={{ fontSize: 20, color: 'var(--ink)' }}>15,171</div>
+            </div>
+          </div>
         </div>
 
+        {/* NL Search */}
         <SearchBar onSearch={handleSearch} loading={searchLoading} />
-        <div className="mt-3 mb-3 flex items-center gap-3">
-          <div className="flex-1 h-px bg-zinc-200" />
-          <span className="text-xs text-zinc-400">or value a specific property</span>
-          <div className="flex-1 h-px bg-zinc-200" />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '16px 0' }}>
+          <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, var(--line-2), transparent)' }} />
+          <span className="t-eyebrow">OR INPUT SUBJECT PROPERTY</span>
+          <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left, var(--line-2), transparent)' }} />
         </div>
 
         {searchQuery ? (
-          <SearchResults
-            results={searchResults}
-            total={searchTotal}
-            query={searchQuery}
-            onClear={clearSearch}
-          />
+          <SearchResults results={searchResults} total={searchTotal} query={searchQuery} onClear={clearSearch} />
         ) : (
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-zinc-200 p-6 shadow-sm mb-8">
-          <h2 className="text-sm font-semibold text-zinc-700 mb-4">Property Details</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {field("sqft_living", "Living Area (sqft)")}
-            {field("beds", "Bedrooms")}
-            {field("baths_full", "Full Baths")}
-            {field("year_built", "Year Built")}
-            {field("zip_code", "ZIP Code", "text")}
-            {field("lot_sqft", "Lot Sqft")}
-            {field("lat", "Latitude")}
-            {field("lng", "Longitude")}
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-6 w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-xl transition-colors"
-          >
-            {loading ? "Estimating…" : "Get Estimate"}
-          </button>
-          {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
-        </form>
-        )}
+          <>
+            {/* Two-column: form + result */}
+            <div style={{ display: 'grid', gridTemplateColumns: result ? '360px 1fr' : '1fr', gap: 18, marginBottom: 18 }}>
+              {/* Form */}
+              <div className="panel tick-corners scanlines">
+                <div className="panel-head">
+                  <div className="panel-dot" />
+                  <span className="panel-label">SUBJECT · INPUT</span>
+                  <span className="panel-meta">8 FIELDS · &lt;200ms</span>
+                </div>
+                <form onSubmit={handleSubmit} style={{ padding: '16px 16px 20px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                    {FIELDS.map(([key, label, type]) => (
+                      <div key={key}>
+                        <div className="term-label">{label}</div>
+                        <input
+                          type={type ?? "number"}
+                          value={form[key]}
+                          onChange={(e) => setForm((f) => ({
+                            ...f,
+                            [key]: type === "text" ? e.target.value : Number(e.target.value)
+                          }))}
+                          className="term-input"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="hr-dot" style={{ margin: '14px 0' }} />
+                  <button type="submit" disabled={loading} className="btn-gold">
+                    {loading ? "ESTIMATING…" : "EXECUTE VALUATION ↵"}
+                  </button>
+                  {error && (
+                    <p className="t-mono" style={{ marginTop: 8, fontSize: 11, color: 'var(--red)' }}>
+                      ERR · {error}
+                    </p>
+                  )}
+                </form>
+              </div>
 
-        {result && (
-          <div className="space-y-6">
-            <PredictionCard result={result} />
-            <ShapWaterfall features={result.shap_top5} />
-            <ExplanationCard
-              prediction={result}
-              zipCode={form.zip_code}
-              sqft={form.sqft_living}
-              beds={form.beds}
-              baths={form.baths_full}
-              yearBuilt={form.year_built}
-            />
-            <CompsTable comps={comps} />
-          </div>
+              {/* Result */}
+              {result && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                  <PredictionCard result={result} />
+                </div>
+              )}
+            </div>
+
+            {/* SHAP + AI row */}
+            {result && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 18, marginBottom: 18 }}>
+                <ShapWaterfall features={result.shap_top5} />
+                <ExplanationCard
+                  prediction={result}
+                  zipCode={form.zip_code}
+                  sqft={form.sqft_living}
+                  beds={form.beds}
+                  baths={form.baths_full}
+                  yearBuilt={form.year_built}
+                />
+              </div>
+            )}
+
+            {/* Comps */}
+            {result && comps.length > 0 && <CompsTable comps={comps} />}
+          </>
         )}
       </div>
     </main>

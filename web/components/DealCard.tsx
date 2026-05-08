@@ -1,72 +1,79 @@
 import { DealItem } from "@/lib/api";
 
 const fmt = (n: number) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(n);
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 
 export function DealCard({ deal }: { deal: DealItem }) {
   const gap = deal.value_gap_pct;
-  const gapColor =
-    gap >= 20 ? "text-emerald-700 bg-emerald-100" : gap >= 15 ? "text-emerald-600 bg-emerald-50" : "text-zinc-700 bg-zinc-100";
+  const isHot = gap >= 20;
+  const filled = Math.round((deal.confidence_score / 100) * 14);
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
+    <div className="panel tick-corners scanlines" style={{ overflow: 'hidden' }}>
       {deal.photo_url && (
-        <div className="h-40 bg-zinc-100 overflow-hidden">
+        <div style={{ height: 140, overflow: 'hidden', position: 'relative' }}>
           <img
             src={deal.photo_url}
-            alt={deal.address || "Listing photo"}
-            className="w-full h-full object-cover"
+            alt={deal.address || "Listing"}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.7) saturate(0.6)' }}
           />
+          <div style={{
+            position: 'absolute', bottom: 0, left: 0, right: 0,
+            height: 40,
+            background: 'linear-gradient(to top, var(--bg-1), transparent)',
+          }} />
         </div>
       )}
-      <div className="p-4 space-y-3">
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-sm font-medium text-zinc-800 leading-tight">
-            {deal.address || "Address unavailable"}
-          </p>
-          <span className={`flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-bold ${gapColor}`}>
-            +{gap.toFixed(1)}%
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 gap-1 text-sm">
+      <div className="panel-head">
+        <div className="panel-dot" style={isHot ? { background: 'var(--gold)', boxShadow: '0 0 10px var(--gold)' } : {}} />
+        <span className="panel-label" style={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {(deal.address || 'ADDR UNKNOWN').toUpperCase()}
+        </span>
+        <span style={{
+          marginLeft: 'auto',
+          fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600,
+          color: '#1a1408', background: isHot ? 'var(--gold)' : 'var(--mute)',
+          padding: '2px 8px', letterSpacing: '0.08em', flexShrink: 0
+        }}>
+          +{gap.toFixed(1)}%
+        </span>
+      </div>
+      <div style={{ padding: '14px 14px 16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
           <div>
-            <p className="text-xs text-zinc-400">List Price</p>
-            <p className="font-semibold text-zinc-700">
-              {deal.list_price ? fmt(deal.list_price) : "—"}
-            </p>
+            <div className="t-eyebrow" style={{ marginBottom: 4 }}>LIST PRICE</div>
+            <div className="t-mono" style={{ fontSize: 15, color: 'var(--ink-2)' }}>
+              {deal.list_price ? fmt(deal.list_price) : '—'}
+            </div>
           </div>
           <div>
-            <p className="text-xs text-zinc-400">AVM Estimate</p>
-            <p className="font-semibold text-emerald-600">{fmt(deal.predicted_price)}</p>
+            <div className="t-eyebrow" style={{ marginBottom: 4 }}>AVM ESTIMATE</div>
+            <div className="t-mono" style={{ fontSize: 15, color: 'var(--gold)', fontWeight: 500 }}>
+              {fmt(deal.predicted_price)}
+            </div>
           </div>
         </div>
-
-        <div className="flex flex-wrap gap-3 text-xs text-zinc-500">
-          {deal.zip_code && <span>ZIP {deal.zip_code}</span>}
-          {deal.beds != null && <span>{deal.beds} BD</span>}
-          {deal.baths_full != null && <span>{deal.baths_full} BA</span>}
-          {deal.sqft_living != null && <span>{deal.sqft_living.toLocaleString()} sqft</span>}
+        <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+          {deal.zip_code && <span className="t-eyebrow">{deal.zip_code}</span>}
+          {deal.beds != null && <span className="t-eyebrow">{deal.beds}BD</span>}
+          {deal.baths_full != null && <span className="t-eyebrow">{deal.baths_full}BA</span>}
+          {deal.sqft_living != null && <span className="t-eyebrow">{deal.sqft_living.toLocaleString()}SF</span>}
         </div>
-
         {deal.condition_note && (
-          <p className="text-xs text-zinc-500 italic border-t border-zinc-100 pt-2">
-            &ldquo;{deal.condition_note}&rdquo;
+          <p className="t-mono" style={{ fontSize: 11, color: 'var(--mute)', margin: '0 0 12px', lineHeight: 1.5, borderLeft: '2px solid var(--line-2)', paddingLeft: 8 }}>
+            &quot;{deal.condition_note}&quot;
           </p>
         )}
-
-        <div className="flex items-center gap-2">
-          <div className="flex-1 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-emerald-500 rounded-full"
-              style={{ width: `${deal.confidence_score}%` }}
-            />
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+            <span className="t-eyebrow">CONFIDENCE</span>
+            <span className="t-mono" style={{ fontSize: 10, color: 'var(--gold)' }}>{deal.confidence_score}%</span>
           </div>
-          <span className="text-xs text-zinc-400">{deal.confidence_score}% conf</span>
+          <div className="conf-segments">
+            {Array.from({ length: 14 }).map((_, i) => (
+              <div key={i} className={`conf-seg${i < filled ? ' on' : ''}`} />
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -6,6 +6,12 @@ interface Props {
   loading: boolean;
 }
 
+const SUGGESTIONS = [
+  '3BR under $400k in 78704',
+  'undervalued homes near downtown',
+  'pool homes 78745 built after 2010',
+];
+
 export function SearchBar({ onSearch, loading }: Props) {
   const [query, setQuery] = useState("");
 
@@ -15,25 +21,58 @@ export function SearchBar({ onSearch, loading }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative">
-      <div className="flex items-center gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 shadow-sm focus-within:ring-2 focus-within:ring-emerald-500">
-        <span className="text-emerald-500 text-lg flex-shrink-0">✦</span>
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder='Try "3BR under $400k in 78704" or "undervalued homes near downtown"'
-          className="flex-1 bg-transparent text-sm text-zinc-800 placeholder:text-zinc-400 focus:outline-none"
-          disabled={loading}
-        />
-        <button
-          type="submit"
-          disabled={loading || !query.trim()}
-          className="flex-shrink-0 rounded-lg bg-emerald-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700 disabled:opacity-40 transition-colors"
-        >
-          {loading ? "Searching..." : "Search"}
-        </button>
+    <div className="panel tick-corners scanlines" style={{ background: 'var(--bg-1)' }}>
+      <div className="panel-head">
+        <div className="panel-dot" />
+        <span className="panel-label">NL · QUERY</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--gold)', letterSpacing: '0.16em' }}>· /</span>
+        <span className="panel-meta">CLAUDE PARSE → SUPABASE SQL</span>
       </div>
-    </form>
+      <form onSubmit={handleSubmit}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px' }}>
+          <span className="t-mono" style={{ fontSize: 14, color: 'var(--gold)' }}>$</span>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder='QUERY → "3BR under $400K in 78704" · "undervalued homes near downtown"'
+            disabled={loading}
+            style={{
+              flex: 1, background: 'transparent', border: 'none', outline: 'none',
+              fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--ink)',
+              letterSpacing: '0.02em',
+            }}
+          />
+          {!loading && (
+            <span style={{ width: 7, height: 14, background: 'var(--gold)' }} className="blink" />
+          )}
+          <button
+            type="submit"
+            disabled={loading || !query.trim()}
+            className="btn-gold"
+            style={{ width: 'auto', padding: '10px 20px' }}
+          >
+            {loading ? "SEARCHING…" : "EXECUTE ↵"}
+          </button>
+        </div>
+        <div style={{ display: 'flex', gap: 8, padding: '0 20px 14px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <span className="t-eyebrow" style={{ marginRight: 4 }}>SUGGEST →</span>
+          {SUGGESTIONS.map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setQuery(s)}
+              style={{
+                background: 'transparent',
+                border: '1px solid var(--line-2)',
+                color: 'var(--ink-2)',
+                fontFamily: 'var(--font-mono)',
+                fontSize: 10.5, letterSpacing: '0.04em',
+                padding: '4px 10px', cursor: 'pointer',
+              }}
+            >{s}</button>
+          ))}
+        </div>
+      </form>
+    </div>
   );
 }

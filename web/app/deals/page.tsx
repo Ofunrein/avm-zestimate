@@ -9,35 +9,38 @@ export default async function DealsPage() {
     deals = await getDeals();
   } catch {
     return (
-      <main className="min-h-screen bg-zinc-50">
-        <div className="max-w-5xl mx-auto px-4 py-12">
-          <a href="/" className="text-sm text-emerald-600 hover:underline">← Back</a>
-          <p className="mt-4 text-zinc-400 text-sm">Could not load deals. Check API connection.</p>
+      <main style={{ minHeight: '100vh', background: 'var(--bg)', padding: '32px 28px' }}>
+        <div style={{ maxWidth: 1080, margin: '0 auto' }}>
+          <a href="/" className="btn-ghost" style={{ display: 'inline-block', marginBottom: 24 }}>← BACK</a>
+          <p className="t-mono" style={{ color: 'var(--red)', fontSize: 12 }}>ERR · COULD NOT LOAD DEALS · CHECK API CONNECTION</p>
         </div>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-zinc-50">
-      <div className="max-w-5xl mx-auto px-4 py-12 space-y-8">
-        <div>
-          <a href="/" className="text-sm text-emerald-600 hover:underline">← Back</a>
-          <h1 className="text-3xl font-bold text-zinc-900 mt-2">This Week&apos;s Deals</h1>
-          <p className="text-zinc-500 mt-1">
-            {deals.length} undervalued Austin properties · AVM predicts {">"}10% above list price
-          </p>
+    <main style={{ minHeight: '100vh', background: 'var(--bg)', padding: '32px 28px 64px' }}>
+      <div style={{ maxWidth: 1080, margin: '0 auto' }}>
+        <a href="/" className="btn-ghost" style={{ display: 'inline-block', marginBottom: 24 }}>← BACK</a>
+        <div style={{ marginBottom: 28 }}>
+          <div className="t-eyebrow" style={{ marginBottom: 8 }}>DEAL MONITOR · WEEKLY SCAN</div>
+          <h1 className="t-display" style={{ fontSize: 36, margin: '0 0 8px', color: 'var(--ink)' }}>
+            This Week&apos;s <span style={{ color: 'var(--gold)' }}>Undervalued</span> Properties
+          </h1>
+          <div className="t-mono" style={{ fontSize: 12, color: 'var(--mute)' }}>
+            {deals.length} PROPERTIES · AVM PREDICTS &gt;10% ABOVE LIST PRICE · AUSTIN TX
+          </div>
         </div>
 
         {deals.length === 0 ? (
-          <div className="rounded-2xl border border-zinc-200 bg-white p-12 text-center">
-            <p className="text-zinc-400 text-sm">No deals found yet.</p>
-            <p className="text-zinc-300 text-xs mt-1">
-              Run the deal monitor script or wait for the weekly GitHub Actions cron.
+          <div className="panel" style={{ padding: '48px 32px', textAlign: 'center' }}>
+            <div className="t-eyebrow" style={{ marginBottom: 12 }}>NO DEALS FOUND THIS CYCLE</div>
+            <p className="t-mono" style={{ fontSize: 12, color: 'var(--mute)' }}>
+              DEAL MONITOR RUNS WEEKLY · GITHUB ACTIONS · MONDAY 08:00 UTC
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 18 }}>
             {deals.map((deal) => (
               <DealCard key={deal.id} deal={deal} />
             ))}

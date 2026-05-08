@@ -7,32 +7,37 @@ const fmt = (n: number) =>
 export function CompsTable({ comps }: { comps: CompProperty[] }) {
   if (!comps.length) return null;
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
-      <div className="px-6 py-4 border-b border-zinc-100">
-        <h3 className="text-sm font-semibold text-zinc-700">Comparable Sales</h3>
+    <div className="panel tick-corners">
+      <div className="panel-head">
+        <div className="panel-dot" />
+        <span className="panel-label">COMPARABLE SALES</span>
+        <span className="panel-meta">{comps.length} COMPS · HAVERSINE + COSINE SIMILARITY</span>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-zinc-50 text-zinc-500 uppercase text-xs">
+      <div style={{ overflowX: 'auto' }}>
+        <table className="term">
+          <thead>
             <tr>
-              <th className="px-4 py-3 text-left">Address</th>
-              <th className="px-4 py-3 text-right">Sale Price</th>
-              <th className="px-4 py-3 text-right">Sqft</th>
-              <th className="px-4 py-3 text-right">Beds/Bath</th>
-              <th className="px-4 py-3 text-right">Distance</th>
-              <th className="px-4 py-3 text-right">Match</th>
+              <th>ADDRESS</th>
+              <th className="num">SALE PRICE</th>
+              <th className="num">SQFT</th>
+              <th className="num">BD/BA</th>
+              <th className="num">DIST · MI</th>
+              <th className="num">MATCH %</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-100">
+          <tbody>
             {comps.map((c, i) => (
-              <tr key={i} className="hover:bg-zinc-50">
-                <td className="px-4 py-3 text-zinc-700">{c.address ?? "—"}</td>
-                <td className="px-4 py-3 text-right font-medium">{fmt(c.sale_price)}</td>
-                <td className="px-4 py-3 text-right">{c.sqft_living?.toLocaleString()}</td>
-                <td className="px-4 py-3 text-right">{c.beds ?? "—"} / {c.bath_total ?? "—"}</td>
-                <td className="px-4 py-3 text-right">{c.distance_miles?.toFixed(2) ?? "—"} mi</td>
-                <td className="px-4 py-3 text-right">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
+              <tr key={i}>
+                <td style={{ color: 'var(--ink)' }}>{c.address ?? '—'}</td>
+                <td className="num" style={{ color: 'var(--gold)' }}>{fmt(c.sale_price)}</td>
+                <td className="num">{c.sqft_living?.toLocaleString()}</td>
+                <td className="num">{c.beds ?? '—'} / {c.bath_total ?? '—'}</td>
+                <td className="num">{c.distance_miles?.toFixed(2) ?? '—'}</td>
+                <td className="num">
+                  <span style={{
+                    color: c.similarity_score > 0.9 ? 'var(--gold)' : 'var(--ink-2)',
+                    fontWeight: c.similarity_score > 0.9 ? 600 : 400,
+                  }}>
                     {(c.similarity_score * 100).toFixed(0)}%
                   </span>
                 </td>

@@ -39,20 +39,33 @@ export function ExplanationCard({ prediction, zipCode, sqft, beds, baths, yearBu
   if (!loading && !explanation) return null;
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-lg">✦</span>
-        <span className="text-sm font-semibold text-emerald-600">AI Analysis</span>
+    <div className="panel tick-corners scanlines">
+      <div className="panel-head">
+        <div className="panel-dot" />
+        <span className="panel-label">AI · ANALYSIS</span>
+        <span className="panel-meta">CLAUDE HAIKU · SHAP-GROUNDED</span>
       </div>
-      {loading ? (
-        <div className="space-y-2">
-          <div className="h-4 bg-zinc-100 rounded animate-pulse w-full" />
-          <div className="h-4 bg-zinc-100 rounded animate-pulse w-5/6" />
-          <div className="h-4 bg-zinc-100 rounded animate-pulse w-4/6" />
-        </div>
-      ) : (
-        <p className="text-sm text-zinc-700 leading-relaxed">{explanation}</p>
-      )}
+      <div style={{ padding: '16px 18px 18px' }}>
+        {loading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[1, 0.85, 0.7].map((w, i) => (
+              <div key={i} style={{
+                height: 12, borderRadius: 0,
+                background: 'var(--bg-3)',
+                width: `${w * 100}%`,
+                animation: `pulse 1.5s ease-in-out ${i * 0.15}s infinite`,
+              }} />
+            ))}
+          </div>
+        ) : (
+          <p className="t-mono" style={{
+            fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.7,
+            margin: 0, letterSpacing: '0.01em'
+          }}>
+            {explanation}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

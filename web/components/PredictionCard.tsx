@@ -5,31 +5,44 @@ const fmt = (n: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 
 export function PredictionCard({ result }: { result: PredictionResponse }) {
-  const range = result.upper_bound - result.lower_bound;
-  const rangePct = ((range / result.predicted_price) * 100).toFixed(1);
+  const segs = 20;
+  const filled = Math.round((result.confidence_score / 100) * segs);
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm space-y-4">
-      <div className="text-center">
-        <p className="text-sm text-zinc-500 uppercase tracking-wide">Estimated Value</p>
-        <p className="text-4xl font-bold text-zinc-900">{fmt(result.predicted_price)}</p>
-        <p className="text-sm text-zinc-500 mt-1">
-          {fmt(result.lower_bound)} – {fmt(result.upper_bound)}{" "}
-          <span className="text-zinc-400">({rangePct}% range, 90% CI)</span>
-        </p>
+    <div className="panel tick-corners scanlines" style={{ background: 'var(--bg-1)' }}>
+      <div className="panel-head">
+        <div className="panel-dot" />
+        <span className="panel-label">ESTIMATED VALUE</span>
+        <span className="panel-meta">MODEL v{result.model_version} · 90% CI</span>
       </div>
-
-      <div className="flex items-center gap-2">
-        <div className="flex-1 h-2 bg-zinc-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-emerald-500 rounded-full transition-all"
-            style={{ width: `${result.confidence_score}%` }}
-          />
+      <div style={{ padding: '24px 20px 20px', textAlign: 'center' }}>
+        <div className="t-eyebrow" style={{ marginBottom: 10 }}>AVM ESTIMATE · AUSTIN TX</div>
+        <div className="t-mono glitch-in" style={{
+          fontSize: 48, color: 'var(--gold)', letterSpacing: '-0.02em',
+          lineHeight: 1, fontWeight: 500,
+        }}>
+          {fmt(result.predicted_price)}
         </div>
-        <span className="text-sm text-zinc-600 font-medium">{result.confidence_score}/100 confidence</span>
+        <div className="t-mono" style={{
+          fontSize: 13, color: 'var(--ink-2)', marginTop: 8, letterSpacing: '0.04em'
+        }}>
+          {fmt(result.lower_bound)} <span style={{ color: 'var(--mute)' }}>→</span> {fmt(result.upper_bound)}
+        </div>
       </div>
 
-      <p className="text-xs text-zinc-400">Model v{result.model_version}</p>
+      <div style={{ padding: '0 20px 20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+          <span className="t-eyebrow">CONFIDENCE</span>
+          <span className="t-mono" style={{ fontSize: 11, color: 'var(--gold)' }}>
+            {result.confidence_score}/100
+          </span>
+        </div>
+        <div className="conf-segments">
+          {Array.from({ length: segs }).map((_, i) => (
+            <div key={i} className={`conf-seg${i < filled ? ' on' : ''}`} />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
