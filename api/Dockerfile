@@ -5,6 +5,9 @@ WORKDIR /app
 # copy ML source (needed for feature engineering imports)
 COPY ml/src/ ./ml/src/
 
+# copy trained model artifacts
+COPY ml/models/ ./ml/models/
+
 # copy API
 COPY api/ ./api/
 
