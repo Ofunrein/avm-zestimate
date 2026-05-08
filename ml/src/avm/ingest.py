@@ -5,7 +5,6 @@ import zipfile
 from pathlib import Path
 
 import pandas as pd
-from numbers_parser import Document
 
 RAW = Path(__file__).parents[3] / "data/raw"
 PROCESSED = Path(__file__).parents[3] / "data/processed"
@@ -32,6 +31,7 @@ def fetch_kaggle_austin(dest: Path = RAW) -> Path:
 
 def parse_numbers_listings(path: Path = NUMBERS_PATH) -> pd.DataFrame:
     """Parse Apple .numbers file into DataFrame."""
+    from numbers_parser import Document  # lazy import — conflicts with MLflow's protobuf pin
     if not path.exists():
         raise FileNotFoundError(f"Numbers file not found: {path}")
     doc = Document(str(path))
