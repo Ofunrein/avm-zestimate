@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 const NAV_LINKS = [
-  { href: "/",           label: "VALUATION" },
-  { href: "/benchmark",  label: "BENCHMARK" },
-  { href: "/scanner",    label: "SCANNER" },
-  { href: "/deals",      label: "DEALS" },
-  { href: "/model-card", label: "MODEL CARD" },
+  { href: "/",              label: "VALUATION" },
+  { href: "/opportunities", label: "OPPORTUNITIES" },
+  { href: "/upload",        label: "UPLOAD" },
+  { href: "/benchmark",     label: "BENCHMARK" },
+  { href: "/model-card",    label: "MODEL CARD" },
 ];
 
 function TopNav() {
@@ -42,7 +42,7 @@ function TopNav() {
 
   return (
     <nav className="topbar" style={{ position: "sticky", top: 0, zIndex: 100 }}>
-      <span className="t-display" style={{ fontSize: 13, color: "var(--gold)", letterSpacing: "0.08em", flexShrink: 0 }}>AVM</span>
+      <span className="t-display" style={{ fontSize: 13, color: "var(--gold)", letterSpacing: "0.08em", flexShrink: 0 }}>AUSTIN AVM</span>
       <div style={{ width: 1, height: 20, background: "var(--line-2)", flexShrink: 0 }} />
       <div style={{ display: "flex", gap: 2, overflowX: "auto" }}>
         {NAV_LINKS.map(({ href, label }) => (
@@ -93,8 +93,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
-        <title>Austin AVM — Hyperlocal Valuation</title>
-        <meta name="description" content="Bloomberg Terminal-grade home valuation for Austin, TX" />
+        <title>Austin Housing Intelligence — AVM</title>
+        <meta name="description" content="Explainable automated valuation model for Austin TX real estate" />
         <script dangerouslySetInnerHTML={{ __html: `
           (function(){
             var t = localStorage.getItem('avm-theme') || 'light';

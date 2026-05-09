@@ -171,7 +171,7 @@ export async function searchProperties(query: string): Promise<SearchResponse> {
   return res.json();
 }
 
-export interface DealItem {
+export interface OpportunityItem {
   id: string;
   address?: string;
   zip_code?: string;
@@ -187,17 +187,18 @@ export interface DealItem {
   condition_note?: string;
   shap_top_driver?: string;
   deal_score?: number;
+  data_source?: string;
   created_at?: string;
 }
 
-export async function getDeals(params?: {
-  zip_code?: string;
+export async function getOpportunities(params?: {
+  limit?: number;
   min_gap?: number;
-}): Promise<DealItem[]> {
-  const qs = new URLSearchParams();
-  if (params?.zip_code) qs.set("zip_code", params.zip_code);
-  if (params?.min_gap) qs.set("min_gap", String(params.min_gap));
-  const res = await fetch(`${API_BASE}/deals?${qs}`);
-  if (!res.ok) throw new Error(await res.text());
+}): Promise<OpportunityItem[]> {
+  const url = new URL(`${API_BASE}/opportunities`);
+  if (params?.limit)   url.searchParams.set("limit",   String(params.limit));
+  if (params?.min_gap) url.searchParams.set("min_gap", String(params.min_gap));
+  const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
+  if (!res.ok) throw new Error("opportunities fetch failed");
   return res.json();
 }
