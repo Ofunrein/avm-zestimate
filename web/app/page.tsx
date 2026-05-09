@@ -1,199 +1,93 @@
 "use client";
 import { useState, useEffect } from "react";
-import { predict, getComps, getBenchmark, PredictionResponse, CompProperty, searchProperties, SearchResult } from "@/lib/api";
-import { PredictionCard } from "@/components/PredictionCard";
-import { ShapWaterfall } from "@/components/ShapWaterfall";
-import { CompsTable } from "@/components/CompsTable";
-import { ExplanationCard } from "@/components/ExplanationCard";
-import { SearchBar } from "@/components/SearchBar";
-import { SearchResults } from "@/components/SearchResults";
+import { getBenchmark } from "@/lib/api";
+import { ValueCanvas } from "@/components/ValueCanvas";
+import { BrowseCanvas } from "@/components/BrowseCanvas";
+import { UploadCanvas } from "@/components/UploadCanvas";
 
-const DEFAULT = {
-  sqft_living: 1800, beds: 3, baths_full: 2, baths_half: 0,
-  year_built: 2005, zip_code: "78701", lat: 30.27, lng: -97.74,
-  lot_sqft: 5000, garage_spaces: 1, has_pool: 0, assessed_value: 0,
-};
+type Mode = "value" | "browse" | "upload";
 
-const FIELDS: Array<[keyof typeof DEFAULT, string, string, string?]> = [
-  ["sqft_living",    "01 · LIVING SQFT",   "number"],
-  ["lot_sqft",       "02 · LOT SQFT",       "number"],
-  ["beds",           "03 · BEDS",           "number"],
-  ["baths_full",     "04 · FULL BATHS",     "number"],
-  ["year_built",     "05 · YEAR BUILT",     "number"],
-  ["zip_code",       "06 · ZIP CODE",       "text"],
-  ["lat",            "07 · LAT",            "number"],
-  ["lng",            "08 · LNG",            "number"],
+const MODES: { id: Mode; label: string }[] = [
+  { id: "value",  label: "Value a Property" },
+  { id: "browse", label: "Browse Opportunities" },
+  { id: "upload", label: "Upload Listings" },
 ];
 
 export default function HomePage() {
-  const [form, setForm] = useState(DEFAULT);
-  const [result, setResult] = useState<PredictionResponse | null>(null);
-  const [comps, setComps] = useState<CompProperty[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string | null>(null);
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [searchTotal, setSearchTotal] = useState(0);
-  const [searchLoading, setSearchLoading] = useState(false);
-  const [heroStats, setHeroStats] = useState<{ medape: string; within10: string; nTest: string }>({
-    medape: "—", within10: "—", nTest: "—",
-  });
+  const [mode, setMode] = useState<Mode>("value");
+  const [stats, setStats] = useState({ medape: "—", nTest: "—" });
+
   useEffect(() => {
-    getBenchmark().then(b => {
-      setHeroStats({
-        medape: b.test_medape != null ? `${b.test_medape.toFixed(2)}%` : "—",
-        within10: b.test_within_10pct != null ? `${(b.test_within_10pct * 100).toFixed(1)}%` : "—",
-        nTest: b.n_test != null ? b.n_test.toLocaleString() : "—",
-      });
-    }).catch(() => {});
+    getBenchmark().then(b => setStats({
+      medape: b.test_medape != null ? `${b.test_medape.toFixed(2)}%` : "—",
+      nTest:  b.n_test != null ? b.n_test.toLocaleString() : "—",
+    })).catch(() => {});
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    try {
-      const [pred, compsData] = await Promise.all([
-        predict(form),
-        getComps(form.lat, form.lng, form.sqft_living, form.beds, form.baths_full, form.year_built),
-      ]);
-      setResult(pred);
-      setComps(compsData);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearch = async (query: string) => {
-    setSearchLoading(true);
-    setSearchQuery(query);
-    try {
-      const resp = await searchProperties(query);
-      setSearchResults(resp.results);
-      setSearchTotal(resp.total);
-    } catch {
-      setSearchResults([]);
-      setSearchTotal(0);
-    } finally {
-      setSearchLoading(false);
-    }
-  };
-
-  const clearSearch = () => {
-    setSearchQuery(null);
-    setSearchResults([]);
-  };
-
   return (
-    <main style={{ minHeight: '100vh', background: 'var(--bg)', padding: '0 0 64px' }}>
-      <div className="page-container">
-        {/* Page heading */}
-        <div className="page-heading-row">
-          <div>
-            <div className="t-eyebrow" style={{ marginBottom: 8 }}>SECTION 01 · HYPERLOCAL VALUATION ENGINE · AUSTIN TX</div>
-            <h1 className="t-display" style={{ fontSize: 40, margin: 0, color: 'var(--ink)', lineHeight: 0.95 }}>
-              Tell us what to{' '}
-              <span style={{ color: 'var(--gold)', fontStyle: 'italic' }}>price.</span>
-            </h1>
+    <main style={{ minHeight: "100vh", background: "var(--bg)" }}>
+      <div style={{ maxWidth: 1080, margin: "0 auto", padding: "40px 28px 64px" }}>
+
+        {/* Hero */}
+        <div style={{ marginBottom: 28 }}>
+          <div className="t-eyebrow" style={{ marginBottom: 10 }}>
+            AUSTIN HOUSING INTELLIGENCE · EXPLAINABLE AVM · AUSTIN TX
           </div>
-          <div className="page-heading-stats">
-            <div style={{ textAlign: 'right' }}>
-              <div className="t-eyebrow">MEDAPE</div>
-              <div className="t-mono" style={{ fontSize: 20, color: 'var(--gold)' }}>{heroStats.medape}</div>
-            </div>
-            <div style={{ width: 1, height: 32, background: 'var(--line-2)' }} />
-            <div style={{ textAlign: 'right' }}>
-              <div className="t-eyebrow">WITHIN 10%</div>
-              <div className="t-mono" style={{ fontSize: 20, color: 'var(--ink)' }}>{heroStats.within10}</div>
-            </div>
-            <div style={{ width: 1, height: 32, background: 'var(--line-2)' }} />
-            <div style={{ textAlign: 'right' }}>
-              <div className="t-eyebrow">TEST SET</div>
-              <div className="t-mono" style={{ fontSize: 20, color: 'var(--ink)' }}>{heroStats.nTest}</div>
-            </div>
+          <h1 className="t-display" style={{ fontSize: 44, color: "var(--ink)", margin: "0 0 12px", lineHeight: 0.95 }}>
+            Austin Housing<br />
+            <span style={{ color: "var(--gold)" }}>Intelligence</span>
+          </h1>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: 13, color: "var(--mute)", margin: "0 0 28px", maxWidth: 520 }}>
+            Estimate one property, browse modeled market opportunities, or score your own listings.
+          </p>
+
+          {/* Mode tabs */}
+          <div style={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+            {MODES.map(m => (
+              <button
+                key={m.id}
+                onClick={() => setMode(m.id)}
+                style={{
+                  fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700,
+                  letterSpacing: "0.14em", textTransform: "uppercase",
+                  padding: "10px 22px",
+                  background: mode === m.id ? "var(--gold)" : "var(--bg-2)",
+                  color: mode === m.id ? "#fff" : "var(--mute)",
+                  border: `1.5px solid ${mode === m.id ? "var(--gold)" : "var(--line-2)"}`,
+                  cursor: "pointer", transition: "all .12s",
+                }}
+              >
+                {m.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* NL Search */}
-        <SearchBar onSearch={handleSearch} loading={searchLoading} />
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '16px 0' }}>
-          <div style={{ flex: 1, height: 1, background: 'linear-gradient(to right, var(--line-2), transparent)' }} />
-          <span className="t-eyebrow">OR INPUT SUBJECT PROPERTY</span>
-          <div style={{ flex: 1, height: 1, background: 'linear-gradient(to left, var(--line-2), transparent)' }} />
+        {/* Results canvas */}
+        <div className="panel" style={{ marginBottom: 32 }}>
+          {mode === "value"  && <ValueCanvas />}
+          {mode === "browse" && <BrowseCanvas />}
+          {mode === "upload" && <UploadCanvas />}
         </div>
 
-        {searchQuery ? (
-          <SearchResults results={searchResults} total={searchTotal} query={searchQuery} onClear={clearSearch} />
-        ) : (
-          <>
-            {/* Two-column: form + result */}
-            <div className={result ? "grid-form-result" : ""} style={{ marginBottom: 18 }}>
-              {/* Form */}
-              <div className="panel tick-corners scanlines">
-                <div className="panel-head">
-                  <div className="panel-dot" />
-                  <span className="panel-label">SUBJECT · INPUT</span>
-                  <span className="panel-meta">8 FIELDS · &lt;200ms</span>
-                </div>
-                <form onSubmit={handleSubmit} style={{ padding: '16px 16px 20px' }}>
-                  <div className="form-grid">
-                    {FIELDS.map(([key, label, type]) => (
-                      <div key={key}>
-                        <div className="term-label">{label}</div>
-                        <input
-                          type={type ?? "number"}
-                          value={form[key]}
-                          onChange={(e) => setForm((f) => ({
-                            ...f,
-                            [key]: type === "text" ? e.target.value : Number(e.target.value)
-                          }))}
-                          className="term-input"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="hr-dot" style={{ margin: '14px 0' }} />
-                  <button type="submit" disabled={loading} className="btn-gold">
-                    {loading ? "ESTIMATING…" : "EXECUTE VALUATION ↵"}
-                  </button>
-                  {error && (
-                    <p className="t-mono" style={{ marginTop: 8, fontSize: 11, color: 'var(--red)' }}>
-                      ERR · {error}
-                    </p>
-                  )}
-                </form>
+        {/* Trust strip */}
+        <div style={{ display: "flex", gap: 32, flexWrap: "wrap", paddingTop: 18, borderTop: "1px solid var(--line)" }}>
+          {[
+            { label: "MEDAPE",    value: stats.medape, gold: true },
+            { label: "TEST SET",  value: stats.nTest },
+            { label: "ZIPS",      value: "38 Austin ZIPs" },
+            { label: "MODEL",     value: "XGB + LGB Ensemble" },
+            { label: "DATA MODE", value: "Historical Backtest" },
+          ].map(({ label, value, gold }) => (
+            <div key={label}>
+              <div className="t-eyebrow" style={{ marginBottom: 3 }}>{label}</div>
+              <div className="t-mono" style={{ fontSize: 13, color: gold ? "var(--gold)" : "var(--ink-2)", fontWeight: 600 }}>
+                {value}
               </div>
-
-              {/* Result */}
-              {result && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-                  <PredictionCard result={result} />
-                </div>
-              )}
             </div>
+          ))}
+        </div>
 
-            {/* SHAP + AI row */}
-            {result && (
-              <div className="grid-shap-ai">
-                <ShapWaterfall features={result.shap_top5} />
-                <ExplanationCard
-                  prediction={result}
-                  zipCode={form.zip_code}
-                  sqft={form.sqft_living}
-                  beds={form.beds}
-                  baths={form.baths_full}
-                  yearBuilt={form.year_built}
-                />
-              </div>
-            )}
-
-            {/* Comps */}
-            {result && comps.length > 0 && <CompsTable comps={comps} />}
-          </>
-        )}
       </div>
     </main>
   );
