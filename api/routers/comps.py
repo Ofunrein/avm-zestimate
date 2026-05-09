@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, HTTPException
 import pandas as pd
 import sys
 from pathlib import Path
@@ -15,10 +15,12 @@ def get_sold_df() -> pd.DataFrame:
     global _sold_df
     if _sold_df is None:
         p = Path(__file__).parents[2] / "ml/data/processed/train_features.parquet"
-        if p.exists():
-            _sold_df = pd.read_parquet(p)
-        else:
-            _sold_df = pd.DataFrame()
+        if not p.exists():
+            raise HTTPException(
+                status_code=503,
+                detail="Comparable sales data unavailable. Run the training pipeline to generate train_features.parquet.",
+            )
+        _sold_df = pd.read_parquet(p)
     return _sold_df
 
 

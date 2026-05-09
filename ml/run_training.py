@@ -57,6 +57,12 @@ def main():
     df = add_market_features(df)
     df = add_assessed_features(df)
 
+    # Persist processed features for comps endpoint
+    processed_dir = Path(__file__).parent / "data/processed"
+    processed_dir.mkdir(parents=True, exist_ok=True)
+    df.to_parquet(processed_dir / "train_features.parquet", index=False)
+    print(f"  Saved train_features.parquet ({len(df):,} rows)")
+
     # 3. Split
     print("[3/9] Temporal split...")
     train_df, test_df = train_test_split_temporal(df, test_start="2024-01-01")
