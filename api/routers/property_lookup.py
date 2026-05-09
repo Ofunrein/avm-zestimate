@@ -16,7 +16,7 @@ router = APIRouter()
 
 APIFY_TOKEN = os.environ.get("APIFY_API_TOKEN", "")
 # apify/zillow-scraper — search by address, returns property details
-ACTOR_ID = "apify~zillow-scraper"
+ACTOR_ID = "maxcopell~zillow-scraper"
 
 
 class LookupRequest(BaseModel):
