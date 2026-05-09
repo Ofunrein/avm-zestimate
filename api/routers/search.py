@@ -36,11 +36,13 @@ def search(req: SearchRequest):
     if params.get("year_built_min"):
         q = q.gte("year_built", params["year_built_min"])
 
+    # undervalued_only: value_gap_pct is not a DB column — filter in Python after fetch
     if params.get("undervalued_only"):
-        q = q.gt("value_gap_pct", 0).order("value_gap_pct", desc=True)
+        q = q.not_.is_("list_price", "null").order("predicted_price", desc=True)
     else:
         q = q.order("predicted_price", desc=True)
-    rows = q.limit(20).execute().data
+
+    rows = q.limit(50).execute().data
 
     results: list[SearchResult] = []
     for r in rows:
@@ -72,4 +74,5 @@ def search(req: SearchRequest):
         results = [r for r in results if r.value_gap_pct is not None and r.value_gap_pct > 0]
         results.sort(key=lambda x: x.value_gap_pct or 0, reverse=True)
 
+    results = results[:20]
     return SearchResponse(results=results, query_parsed=params, total=len(results))

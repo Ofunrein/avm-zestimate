@@ -53,7 +53,8 @@ def parse_search_query(query: str) -> dict:
         "Extract search parameters from this Austin TX real estate query. Return JSON only, no explanation.\n"
         'Schema: {"beds_min": int|null, "baths_min": float|null, "sqft_min": int|null, '
         '"sqft_max": int|null, "price_max": int|null, "zip_codes": [str]|null, '
-        '"has_pool": bool|null, "undervalued_only": bool, "year_built_min": int|null}\n'
+        '"undervalued_only": bool, "year_built_min": int|null}\n'
+        "Only return fields from this schema. Do not add has_pool or other unsupported fields.\n"
         f"Query: {query}"
     )
     msg = _get_client().messages.create(
