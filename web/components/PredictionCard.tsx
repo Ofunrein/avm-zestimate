@@ -21,7 +21,7 @@ const TIER_CONFIG = {
   low:    { label: "LOW-CONFIDENCE ESTIMATE",         badge: "⚠ DIRECTIONAL ONLY",    color: "var(--mute)" },
 };
 
-export function PredictionCard({ result }: { result: PredictionResponse }) {
+export function PredictionCard({ result, imageUrl }: { result: PredictionResponse; imageUrl?: string }) {
   const t = tier(result.confidence_score);
   const cfg = TIER_CONFIG[t];
   const segs = 20;
@@ -30,6 +30,26 @@ export function PredictionCard({ result }: { result: PredictionResponse }) {
 
   return (
     <div className="panel tick-corners" style={{ background: "var(--bg-1)" }}>
+      {imageUrl && (
+        <div style={{
+          position: "relative",
+          width: "100%",
+          height: 160,
+          overflow: "hidden",
+          borderRadius: "4px 4px 0 0",
+        }}>
+          <img
+            src={imageUrl}
+            alt="Property"
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+          />
+          <div style={{
+            position: "absolute", inset: 0,
+            background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.55) 100%)",
+          }} />
+        </div>
+      )}
       <div className="panel-head">
         <div className="panel-dot" style={t === "low" ? { background: "var(--mute-2)" } : {}} />
         <span className="panel-label">{cfg.label}</span>

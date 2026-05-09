@@ -32,6 +32,7 @@ class LookupResponse(BaseModel):
     beds: int | None = None
     baths_full: float | None = None
     year_built: int | None = None
+    image_url: str | None = None
     source: str = "geocode_only"
 
 
@@ -91,11 +92,18 @@ def _apify_zillow_lookup(address: str) -> dict | None:
         year = item.get("yearBuilt")
         if not any([sqft, beds, baths, year]):
             return None
+        img = (
+            item.get("imgSrc")
+            or item.get("hdpData", {}).get("homeInfo", {}).get("imgSrc")
+            or (item.get("images") or [None])[0]
+            or ((item.get("photos") or [{}])[0].get("url") if item.get("photos") else None)
+        )
         return {
             "sqft_living": float(sqft) if sqft else None,
             "beds": int(beds) if beds else None,
             "baths_full": float(baths) if baths else None,
             "year_built": int(year) if year else None,
+            "image_url": img if isinstance(img, str) and img.startswith("http") else None,
         }
     except Exception:
         return None
@@ -121,6 +129,7 @@ def property_lookup(req: LookupRequest):
         result.beds = enriched.get("beds")
         result.baths_full = enriched.get("baths_full")
         result.year_built = enriched.get("year_built")
+        result.image_url = enriched.get("image_url")
         result.source = "zillow"
 
     return result

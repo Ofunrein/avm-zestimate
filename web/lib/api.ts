@@ -213,6 +213,7 @@ export interface PropertyLookupResult {
   beds?: number;
   baths_full?: number;
   year_built?: number;
+  image_url?: string;
   source: string;
 }
 

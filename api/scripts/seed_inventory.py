@@ -73,7 +73,11 @@ def parse_row(row: dict) -> dict | None:
             "lng": lng,
             "lot_sqft": lot,
             "list_price": price,
-            "photo_url": "",
+            "photo_url": (
+                f"https://photos.zillowstatic.com/fp/{row['homeImage']}"
+                if row.get("homeImage") and str(row.get("homeImage", "")).strip()
+                else ""
+            ),
         }
     except (ValueError, TypeError):
         return None
@@ -145,6 +149,7 @@ def main(csv_path: str | None = None):
             "confidence_score": pred["confidence_score"],
             "shap_json": pred["shap_top5"],
             "list_price": parsed["list_price"],
+            "photo_url": parsed.get("photo_url", ""),
             "data_source": "kaggle_historical",
         })
         if (i + 1) % 50 == 0:

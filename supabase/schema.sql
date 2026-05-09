@@ -90,3 +90,6 @@ alter table deals add column if not exists data_source text default 'kaggle_hist
 -- NOTE: Must also be run manually in the Supabase dashboard SQL editor
 create unique index if not exists idx_predictions_address on predictions(address);
 create unique index if not exists idx_deals_address on deals(address);
+
+-- Property photo URL for opportunity display
+alter table predictions add column if not exists photo_url text;

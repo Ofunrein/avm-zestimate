@@ -14,6 +14,7 @@ const DEFAULT_DETAILS = {
 type GeoResult = {
   lat: number; lng: number; zip_code: string;
   sqft_living?: number; beds?: number; baths_full?: number; year_built?: number;
+  image_url?: string;
   source: string;
 };
 
@@ -53,6 +54,7 @@ export function ValueCanvas() {
         beds: data.beds,
         baths_full: data.baths_full,
         year_built: data.year_built,
+        image_url: data.image_url,
         source: data.source,
       });
       // Auto-fill any returned property details
@@ -244,7 +246,7 @@ export function ValueCanvas() {
         {result && geo && (
           <div style={{ marginTop: 24 }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 18 }}>
-              <PredictionCard result={result} />
+              <PredictionCard result={result} imageUrl={geo.image_url} />
               <ExplanationCard
                 prediction={result}
                 zipCode={geo.zip_code}

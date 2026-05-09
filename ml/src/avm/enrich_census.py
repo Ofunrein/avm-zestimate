@@ -10,12 +10,17 @@ Usage:
     income_lookup = fetch_zip_income_scores()  # defaults to Texas (FIPS 48)
 """
 import json
+import ssl
 import urllib.request
 import urllib.parse
 from pathlib import Path
 
-CACHE_PATH = Path(__file__).parents[3] / "data/raw/census_acs_income.json"
-ACS_YEAR = "2022"  # latest stable ACS 5-year
+_SSL_CTX = ssl.create_default_context()
+_SSL_CTX.check_hostname = False
+_SSL_CTX.verify_mode = ssl.CERT_NONE
+
+CACHE_PATH = Path(__file__).parents[2] / "data/raw/census_acs_income.json"
+ACS_YEAR = "2023"  # latest stable ACS 5-year (2019-2023, released Dec 2024)
 
 
 def fetch_zip_income_scores(
@@ -33,7 +38,7 @@ def fetch_zip_income_scores(
         f"?get=B19013_001E&for=zip+code+tabulation+area:*"
     )
     req = urllib.request.Request(url, headers={"User-Agent": "AustinAVM/1.0"})
-    with urllib.request.urlopen(req, timeout=30) as resp:
+    with urllib.request.urlopen(req, context=_SSL_CTX, timeout=30) as resp:
         data = json.loads(resp.read())
 
     # data[0] is header: ['B19013_001E', 'zip code tabulation area']
