@@ -203,3 +203,25 @@ export async function getOpportunities(params?: {
   if (!res.ok) throw new Error("opportunities fetch failed");
   return res.json();
 }
+
+export interface PropertyLookupResult {
+  address_normalized?: string;
+  zip_code?: string;
+  lat?: number;
+  lng?: number;
+  sqft_living?: number;
+  beds?: number;
+  baths_full?: number;
+  year_built?: number;
+  source: string;
+}
+
+export async function lookupProperty(address: string): Promise<PropertyLookupResult> {
+  const res = await fetch(`${API_BASE}/property-lookup`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ address }),
+  });
+  if (!res.ok) throw new Error("property lookup failed");
+  return res.json();
+}

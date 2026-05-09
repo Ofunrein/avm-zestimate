@@ -1,38 +1,21 @@
 "use client";
 import { useState } from "react";
-import { predict, getComps, PredictionResponse, CompProperty } from "@/lib/api";
+import { predict, getComps, lookupProperty, PredictionResponse, CompProperty } from "@/lib/api";
 import { PredictionCard } from "@/components/PredictionCard";
 import { ShapWaterfall } from "@/components/ShapWaterfall";
 import { CompsTable } from "@/components/CompsTable";
 import { ExplanationCard } from "@/components/ExplanationCard";
 
 const DEFAULT_DETAILS = {
-  sqft_living: 1800, beds: 3, baths_full: 2, baths_half: 0,
-  year_built: 2005, lot_sqft: 5000, garage_spaces: 1, has_pool: 0, assessed_value: 0,
+  sqft_living: 0, beds: 0, baths_full: 0, baths_half: 0,
+  year_built: 2000, lot_sqft: 5000, garage_spaces: 1, has_pool: 0, assessed_value: 0,
 };
 
-type GeoResult = { lat: number; lng: number; zip_code: string; display: string };
-
-async function geocodeAddress(address: string): Promise<GeoResult | null> {
-  const query = address.includes("Austin") || address.includes("TX")
-    ? address
-    : `${address}, Austin, TX`;
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=1&countrycodes=us`;
-  try {
-    const res = await fetch(url, { headers: { "User-Agent": "AustinAVM/1.0" } });
-    const data = await res.json();
-    if (!data.length) return null;
-    const r = data[0];
-    const zip = r.address?.postcode?.slice(0, 5) ?? "";
-    const lat = parseFloat(r.lat);
-    const lng = parseFloat(r.lon);
-    // Rough Austin bounds check
-    if (lat < 29.0 || lat > 31.5 || lng < -99.0 || lng > -96.5) return null;
-    return { lat, lng, zip_code: zip, display: r.display_name };
-  } catch {
-    return null;
-  }
-}
+type GeoResult = {
+  lat: number; lng: number; zip_code: string;
+  sqft_living?: number; beds?: number; baths_full?: number; year_built?: number;
+  source: string;
+};
 
 export function ValueCanvas() {
   const [address, setAddress] = useState("");
@@ -54,14 +37,37 @@ export function ValueCanvas() {
     setGeoError(null);
     setGeo(null);
     setResult(null);
-    const found = await geocodeAddress(address);
-    setGeoLoading(false);
-    if (!found) {
-      setGeoError("Address not found in Austin TX. Try a full street address e.g. '1234 E 6th St, Austin, TX'");
-      return;
+
+    try {
+      const data = await lookupProperty(address);
+      if (!data.lat || !data.lng) {
+        setGeoError("Address not found in Austin TX. Try a full street address e.g. '1234 E 6th St, Austin, TX 78701'");
+        setGeoLoading(false);
+        return;
+      }
+      setGeo({
+        lat: data.lat,
+        lng: data.lng,
+        zip_code: data.zip_code ?? "78701",
+        sqft_living: data.sqft_living,
+        beds: data.beds,
+        baths_full: data.baths_full,
+        year_built: data.year_built,
+        source: data.source,
+      });
+      // Auto-fill any returned property details
+      setDetails(d => ({
+        ...d,
+        sqft_living: data.sqft_living ?? d.sqft_living,
+        beds: data.beds ?? d.beds,
+        baths_full: data.baths_full ?? d.baths_full,
+        year_built: data.year_built ?? d.year_built,
+      }));
+    } catch {
+      setGeoError("Lookup failed — check connection.");
+    } finally {
+      setGeoLoading(false);
     }
-    setGeo(found);
-    if (found.zip_code) setDetails(d => ({ ...d }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,7 +77,7 @@ export function ValueCanvas() {
     setError(null);
     const form = {
       ...details,
-      zip_code: geo.zip_code || "78701",
+      zip_code: geo.zip_code,
       lat: geo.lat,
       lng: geo.lng,
     };
@@ -98,14 +104,14 @@ export function ValueCanvas() {
       </div>
       <div style={{ padding: "24px 24px 28px" }}>
 
-        {/* ── Step 1: Address lookup ── */}
+        {/* ── Address lookup ── */}
         <div style={{ marginBottom: 20 }}>
           <div className="term-label" style={{ marginBottom: 8 }}>AUSTIN TX ADDRESS</div>
           <div style={{ display: "flex", gap: 8 }}>
             <input
               className="term-input"
               type="text"
-              placeholder="1234 E 6th St, Austin, TX"
+              placeholder="1234 E 6th St, Austin, TX 78701"
               value={address}
               onChange={e => { setAddress(e.target.value); setGeo(null); setResult(null); }}
               onKeyDown={e => e.key === "Enter" && (e.preventDefault(), handleLookup())}
@@ -122,19 +128,20 @@ export function ValueCanvas() {
             </button>
           </div>
           {geoError && (
-            <div className="t-mono" style={{ fontSize: 11, color: "var(--red)", marginTop: 6 }}>
-              ⚠ {geoError}
-            </div>
+            <div className="t-mono" style={{ fontSize: 11, color: "var(--red)", marginTop: 6 }}>⚠ {geoError}</div>
           )}
           {geo && (
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}>
               <span style={{ width: 8, height: 8, background: "var(--teal)", borderRadius: "50%", flexShrink: 0 }} />
               <span className="t-mono" style={{ fontSize: 11, color: "var(--teal)", fontWeight: 600 }}>
-                LOCATED · ZIP {geo.zip_code || "—"} · {geo.lat.toFixed(4)}, {geo.lng.toFixed(4)}
+                LOCATED · ZIP {geo.zip_code} · {geo.lat.toFixed(4)}, {geo.lng.toFixed(4)}
+                {geo.source === "zillow" && (
+                  <span style={{ color: "var(--gold)", marginLeft: 8 }}>· DETAILS FROM ZILLOW</span>
+                )}
               </span>
               <button
                 type="button"
-                onClick={() => { setGeo(null); setAddress(""); setResult(null); }}
+                onClick={() => { setGeo(null); setAddress(""); setResult(null); setDetails(DEFAULT_DETAILS); }}
                 className="btn-ghost"
                 style={{ fontSize: 10, padding: "3px 8px", marginLeft: "auto" }}
               >
@@ -144,25 +151,33 @@ export function ValueCanvas() {
           )}
         </div>
 
-        {/* ── Step 2: Property details (shows after geocode) ── */}
+        {/* ── Property details (shows after geocode) ── */}
         {geo && (
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: 16 }}>
-              <div className="t-eyebrow" style={{ marginBottom: 12 }}>PROPERTY DETAILS</div>
+              <div className="t-eyebrow" style={{ marginBottom: 12 }}>
+                PROPERTY DETAILS
+                {geo.source === "zillow" && (
+                  <span className="t-mono" style={{ fontSize: 9, color: "var(--mute)", marginLeft: 8, fontWeight: 400 }}>
+                    AUTO-FILLED · EDIT IF NEEDED
+                  </span>
+                )}
+              </div>
               <div className="form-grid">
                 {([
                   ["sqft_living", "LIVING SQFT", "number"],
                   ["beds",        "BEDS",         "number"],
                   ["baths_full",  "FULL BATHS",   "number"],
                   ["year_built",  "YEAR BUILT",   "number"],
-                ] as Array<[keyof typeof DEFAULT_DETAILS, string, string]>).map(([key, label, type]) => (
+                ] as Array<[keyof typeof DEFAULT_DETAILS, string, string]>).map(([key, label]) => (
                   <div key={key}>
                     <div className="term-label">{label}</div>
                     <input
                       className="term-input"
-                      type={type}
+                      type="number"
                       step="any"
-                      value={details[key]}
+                      value={details[key] || ""}
+                      placeholder="—"
                       onChange={e => setDetails(d => ({
                         ...d,
                         [key]: parseFloat(e.target.value) || 0,
@@ -174,7 +189,6 @@ export function ValueCanvas() {
               </div>
             </div>
 
-            {/* Advanced override */}
             <div style={{ marginBottom: 16 }}>
               <button
                 type="button"
@@ -187,15 +201,15 @@ export function ValueCanvas() {
               {showAdvanced && (
                 <div className="form-grid" style={{ marginTop: 10 }}>
                   {([
-                    ["lot_sqft",     "LOT SQFT",     "number"],
-                    ["garage_spaces","GARAGE SPACES", "number"],
-                    ["has_pool",     "HAS POOL (0/1)","number"],
-                  ] as Array<[keyof typeof DEFAULT_DETAILS, string, string]>).map(([key, label, type]) => (
+                    ["lot_sqft",      "LOT SQFT",      "number"],
+                    ["garage_spaces", "GARAGE SPACES",  "number"],
+                    ["has_pool",      "HAS POOL (0/1)", "number"],
+                  ] as Array<[keyof typeof DEFAULT_DETAILS, string, string]>).map(([key, label]) => (
                     <div key={key}>
                       <div className="term-label">{label}</div>
                       <input
                         className="term-input"
-                        type={type}
+                        type="number"
                         step="any"
                         value={details[key]}
                         onChange={e => setDetails(d => ({
@@ -215,10 +229,9 @@ export function ValueCanvas() {
           </form>
         )}
 
-        {/* If no geocode yet — hint */}
         {!geo && !geoError && (
           <div className="t-mono" style={{ fontSize: 12, color: "var(--mute)", marginTop: 4 }}>
-            Enter an Austin TX address above, then confirm property details to get an estimate.
+            Enter an Austin TX address above to get started. Property details auto-fill when available.
           </div>
         )}
 
@@ -234,7 +247,7 @@ export function ValueCanvas() {
               <PredictionCard result={result} />
               <ExplanationCard
                 prediction={result}
-                zipCode={geo.zip_code || "78701"}
+                zipCode={geo.zip_code}
                 sqft={details.sqft_living}
                 beds={details.beds}
                 baths={details.baths_full}

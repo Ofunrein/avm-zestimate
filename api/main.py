@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routers import predict, comps, benchmark, scan, explain, neighborhood, search, deals
+from api.routers import predict, comps, benchmark, scan, explain, neighborhood, search, deals, property_lookup
 
 app = FastAPI(
     title="Austin AVM API",
@@ -23,6 +23,7 @@ app.include_router(explain.router, tags=["ai"])
 app.include_router(neighborhood.router, tags=["ai"])
 app.include_router(search.router, tags=["ai"])
 app.include_router(deals.router, tags=["deals"])
+app.include_router(property_lookup.router, tags=["property"])
 
 
 @app.get("/health")
