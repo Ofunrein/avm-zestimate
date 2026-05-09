@@ -1,3 +1,12 @@
+---
+title: Austin AVM API
+emoji: 🏠
+colorFrom: yellow
+colorTo: orange
+sdk: docker
+pinned: false
+---
+
 # Austin AVM — AI-Powered Home Valuation
 
 An automated valuation model (AVM) for Austin, TX real estate. Like Zillow's Zestimate, but open-source, explainable, and built on a free stack.
