@@ -14,7 +14,9 @@ def _load_local():
     q_low = joblib.load(LOCAL_MODELS / "q_low.joblib")
     q_high = joblib.load(LOCAL_MODELS / "q_high.joblib")
     meta = json.loads((LOCAL_MODELS / "meta.json").read_text())
-    return xgb, lgb, q_low, q_high, meta
+    enc_path = LOCAL_MODELS / "zip_encoder.joblib"
+    zip_encoder = joblib.load(enc_path) if enc_path.exists() else None
+    return xgb, lgb, q_low, q_high, meta, zip_encoder
 
 
 def _load_from_hf():
@@ -25,12 +27,19 @@ def _load_from_hf():
     for f in files:
         path = hf_hub_download(repo_id=HF_REPO_ID, filename=f)
         shutil.copy(path, tmp / f)
+    try:
+        path = hf_hub_download(repo_id=HF_REPO_ID, filename="zip_encoder.joblib")
+        shutil.copy(path, tmp / "zip_encoder.joblib")
+    except Exception:
+        pass
     xgb = joblib.load(tmp / "xgb_model.joblib")
     lgb = joblib.load(tmp / "lgb_model.joblib")
     q_low = joblib.load(tmp / "q_low.joblib")
     q_high = joblib.load(tmp / "q_high.joblib")
     meta = json.loads((tmp / "meta.json").read_text())
-    return xgb, lgb, q_low, q_high, meta
+    enc_path = tmp / "zip_encoder.joblib"
+    zip_encoder = joblib.load(enc_path) if enc_path.exists() else None
+    return xgb, lgb, q_low, q_high, meta, zip_encoder
 
 
 def load_all_models():

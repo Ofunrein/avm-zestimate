@@ -135,6 +135,10 @@ def main():
     }
     save_models(xgb_model, lgb_model, meta)
 
+    import joblib
+    joblib.dump(zip_encoder, MODELS_DIR / "zip_encoder.joblib")
+    print("  Saved zip_encoder.joblib")
+
     run_id = log_run(
         run_name="full-pipeline",
         params={**xgb_params, "xgb_weight": xgb_weight, "n_test": len(test_df)},

@@ -27,22 +27,24 @@ def add_structural(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def add_location(df: pd.DataFrame, income_lookup: dict | None = None) -> pd.DataFrame:
+def add_location(df: pd.DataFrame, encoder: LabelEncoder | None = None, income_lookup: dict | None = None) -> tuple:
     df = df.copy()
-    # Euclidean proxy for distance (fast, good enough for Austin's flat terrain)
     lat_diff = df["lat"] - DOWNTOWN_LAT
     lng_diff = df["lng"] - DOWNTOWN_LNG
     df["dist_downtown_miles"] = np.sqrt(lat_diff**2 + lng_diff**2) * 69.0
 
-    # ZIP income score (0–1). Pass in dict {zip: normalised_income} from Census ACS.
     if income_lookup:
         df["zip_income_score"] = df["zip_code"].map(income_lookup).fillna(0.5)
     else:
-        df["zip_income_score"] = 0.5  # neutral default
+        df["zip_income_score"] = 0.5
 
-    # Label-encode zip for tree models
-    le = LabelEncoder()
-    df["zip_encoded"] = le.fit_transform(df["zip_code"].astype(str))
+    le = encoder if encoder is not None else LabelEncoder()
+    if encoder is None:
+        le.fit(df["zip_code"].astype(str))
+    known = set(le.classes_)
+    df["zip_encoded"] = df["zip_code"].astype(str).apply(
+        lambda z: int(le.transform([z])[0]) if z in known else 0
+    )
     return df, le
 
 

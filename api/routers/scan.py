@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[2] / "ml/src"))
-from avm.features import add_structural, add_location, add_market_features, build_feature_matrix
+from avm.features import add_structural, add_location, add_market_features, add_assessed_features, build_feature_matrix
 from avm.shap_gen import make_explainer, top_shap_features
 from api.model_loader import load_all_models
 from api.schemas import ScanRequest, ScanItem
@@ -15,16 +15,18 @@ router = APIRouter()
 
 @router.post("/scan", response_model=list[ScanItem])
 def scan(req: ScanRequest):
-    xgb_model, lgb_model, q_low, q_high, meta = load_all_models()
+    xgb_model, lgb_model, q_low, q_high, meta, zip_encoder = load_all_models()
     w = meta.get("xgb_weight", 0.5)
     explainer = make_explainer(xgb_model)
     results = []
 
     for i, prop in enumerate(req.properties):
         df = pd.DataFrame([prop.model_dump()])
+        df["is_covid_period"] = 0
         df = add_structural(df)
-        df, _ = add_location(df)
+        df, _ = add_location(df, encoder=zip_encoder)
         df = add_market_features(df)
+        df = add_assessed_features(df)
         X = build_feature_matrix(df)
 
         xgb_pred = float(np.expm1(xgb_model.predict(X)[0]))

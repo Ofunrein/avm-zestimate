@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parents[2] / "ml/src"))
-from avm.features import add_structural, add_location, add_market_features, build_feature_matrix
+from avm.features import add_structural, add_location, add_market_features, add_assessed_features, build_feature_matrix
 from avm.intervals import predict_intervals, confidence_score
 from avm.shap_gen import make_explainer, top_shap_features
 from api.schemas import PropertyInput, PredictionResponse, ShapFeature
@@ -28,11 +28,13 @@ def _property_to_df(p: PropertyInput) -> pd.DataFrame:
 
 @router.post("/predict", response_model=PredictionResponse)
 def predict(prop: PropertyInput):
-    xgb_model, lgb_model, q_low, q_high, meta = get_models()
+    xgb_model, lgb_model, q_low, q_high, meta, zip_encoder = get_models()
     df = _property_to_df(prop)
+    df["is_covid_period"] = 0
     df = add_structural(df)
-    df, _ = add_location(df)
+    df, _ = add_location(df, encoder=zip_encoder)
     df = add_market_features(df)
+    df = add_assessed_features(df)
     X = build_feature_matrix(df)
 
     xgb_pred = float(np.expm1(xgb_model.predict(X)[0]))
