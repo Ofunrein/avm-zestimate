@@ -123,8 +123,8 @@ cd ml && uv sync
 # Train the model (requires Kaggle API key for data download)
 python run_training.py 10   # 10 Optuna trials for quick test
 
-# Start the API
-cd ../api && uvicorn main:app --reload
+# Start the API (from repo root)
+uvicorn api.main:app --reload
 # API docs at http://localhost:8000/docs
 
 # Start the frontend (new terminal)

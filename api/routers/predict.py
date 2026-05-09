@@ -4,7 +4,7 @@ import pandas as pd
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parents[3] / "ml/src"))
+sys.path.insert(0, str(Path(__file__).parents[2] / "ml/src"))
 from avm.features import add_structural, add_location, add_market_features, build_feature_matrix
 from avm.intervals import predict_intervals, confidence_score
 from avm.shap_gen import make_explainer, top_shap_features

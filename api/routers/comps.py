@@ -3,7 +3,7 @@ import pandas as pd
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parents[3] / "ml/src"))
+sys.path.insert(0, str(Path(__file__).parents[2] / "ml/src"))
 from avm.comps import find_comps
 from api.schemas import CompProperty
 
@@ -14,7 +14,7 @@ _sold_df = None
 def get_sold_df() -> pd.DataFrame:
     global _sold_df
     if _sold_df is None:
-        p = Path(__file__).parents[3] / "ml/data/processed/train_features.parquet"
+        p = Path(__file__).parents[2] / "ml/data/processed/train_features.parquet"
         if p.exists():
             _sold_df = pd.read_parquet(p)
         else:

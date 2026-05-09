@@ -8,8 +8,8 @@ router = APIRouter()
 
 @router.get("/benchmark", response_model=BenchmarkResponse)
 def get_benchmark():
-    meta_path = Path(__file__).parents[3] / "ml/models/meta.json"
-    residuals_path = Path(__file__).parents[3] / "ml/models/residuals.json"
+    meta_path = Path(__file__).parents[2] / "ml/models/meta.json"
+    residuals_path = Path(__file__).parents[2] / "ml/models/residuals.json"
 
     if not meta_path.exists():
         return BenchmarkResponse(
