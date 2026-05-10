@@ -28,10 +28,10 @@ const LABELS: Record<string, string> = {
   is_covid_period:         "Covid Period Flag",
 };
 
-export function ShapWaterfall({ features }: { features: ShapFeature[] }) {
+export function ShapWaterfall({ features, predictedPrice }: { features: ShapFeature[]; predictedPrice: number }) {
   const data = features.map((f) => ({
     name: LABELS[f.feature] ?? f.feature.toUpperCase(),
-    value: f.shap_value,
+    value: Math.round(f.shap_value * predictedPrice),
     direction: f.direction,
   }));
 

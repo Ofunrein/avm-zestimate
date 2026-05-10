@@ -257,7 +257,7 @@ export function ValueCanvas() {
               />
             </div>
             <div style={{ marginBottom: 16 }}>
-              <ShapWaterfall features={result.shap_top5} />
+              <ShapWaterfall features={result.shap_top5} predictedPrice={result.predicted_price} />
             </div>
             {comps.length > 0 && <CompsTable comps={comps} />}
           </div>
