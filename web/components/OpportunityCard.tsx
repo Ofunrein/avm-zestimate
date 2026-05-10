@@ -42,6 +42,7 @@ export function OpportunityCard({ item }: { item: OpportunityItem }) {
             src={item.photo_url}
             alt={item.address || "Property"}
             style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            referrerPolicy="no-referrer"
             onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = "none"; }}
           />
           <div style={{

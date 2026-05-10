@@ -54,6 +54,7 @@ export function SearchResults({ results, total, query, onClear }: Props) {
                     src={r.photo_url}
                     alt={r.address || "Property"}
                     style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                    referrerPolicy="no-referrer"
                     onError={(e) => { (e.target as HTMLImageElement).parentElement!.style.display = "none"; }}
                   />
                   <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.6) 100%)" }} />

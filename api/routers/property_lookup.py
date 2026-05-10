@@ -154,8 +154,13 @@ def _apify_zillow_lookup(address: str) -> dict | None:
             if not any([sqft, beds, baths, year]):
                 continue
             img = (
-                item.get("imgSrc")
+                item.get("hiResImageLink")
+                or item.get("desktopWebHdpImageLink")
+                or item.get("mediumImageLink")
+                or item.get("imgSrc")
                 or item.get("hdpData", {}).get("homeInfo", {}).get("imgSrc")
+                or (item.get("thumb") or [{}])[0].get("url")
+                or (item.get("responsivePhotos") or [{}])[0].get("mixedSources", {}).get("jpeg", [{}])[-1].get("url")
                 or (item.get("miniCardPhotos") or [{}])[0].get("url")
                 or (item.get("photos") or [{}])[0].get("url")
                 or (item.get("images") or [None])[0]

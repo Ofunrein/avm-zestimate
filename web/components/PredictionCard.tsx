@@ -41,6 +41,7 @@ export function PredictionCard({ result, imageUrl }: { result: PredictionRespons
           <img
             src={imageUrl}
             alt="Property"
+            referrerPolicy="no-referrer"
             style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
             onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
           />
