@@ -28,4 +28,9 @@ app.include_router(property_lookup.router, tags=["property"])
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "version": "2.0.0"}
+    import os
+    return {
+        "status": "ok",
+        "version": "2.0.0",
+        "apify_token_set": bool(os.environ.get("APIFY_API_TOKEN")),
+    }

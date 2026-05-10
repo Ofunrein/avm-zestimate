@@ -16,10 +16,13 @@ from pydantic import BaseModel
 
 router = APIRouter()
 
-APIFY_TOKEN = os.environ.get("APIFY_API_TOKEN", "")
 ACTOR_ID = "maxcopell~zillow-scraper"
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "") or os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+
+
+def _apify_token() -> str:
+    return os.environ.get("APIFY_API_TOKEN", "")
 
 
 class LookupRequest(BaseModel):
@@ -128,7 +131,8 @@ def _census_geocode(address: str) -> dict | None:
 
 
 def _apify_zillow_lookup(address: str) -> dict | None:
-    if not APIFY_TOKEN:
+    token = _apify_token()
+    if not token:
         return None
     payload = json.dumps({
         "searchTerm": address,
@@ -137,7 +141,7 @@ def _apify_zillow_lookup(address: str) -> dict | None:
     }).encode()
     url = (
         f"https://api.apify.com/v2/acts/{ACTOR_ID}/run-sync-get-dataset-items"
-        f"?token={APIFY_TOKEN}&timeout=25&memory=256"
+        f"?token={token}&timeout=25&memory=256"
     )
     try:
         req = urllib.request.Request(
