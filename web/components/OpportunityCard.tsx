@@ -1,3 +1,4 @@
+"use client";
 import { OpportunityItem } from "@/lib/api";
 
 const fmt = (n: number) =>
