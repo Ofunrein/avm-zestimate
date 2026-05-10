@@ -95,6 +95,38 @@ def _nominatim_geocode(address: str) -> dict | None:
         return None
 
 
+def _census_geocode(address: str) -> dict | None:
+    """US Census Bureau geocoder — better coverage for newer TX streets."""
+    query = address if ("Austin" in address or "TX" in address) else f"{address}, Austin, TX"
+    url = (
+        "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress"
+        f"?address={urllib.parse.quote(query)}&benchmark=2020&format=json"
+    )
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "AustinAVM/1.0"})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read())
+        matches = data.get("result", {}).get("addressMatches", [])
+        if not matches:
+            return None
+        m = matches[0]
+        coords = m.get("coordinates", {})
+        lat = float(coords.get("y", 0))
+        lng = float(coords.get("x", 0))
+        if not (29.0 <= lat <= 31.5 and -99.0 <= lng <= -96.5):
+            return None
+        components = m.get("addressComponents", {})
+        zip_code = components.get("zip", "")[:5]
+        return {
+            "lat": lat,
+            "lng": lng,
+            "zip_code": zip_code,
+            "display": m.get("matchedAddress", address),
+        }
+    except Exception:
+        return None
+
+
 def _apify_zillow_lookup(address: str) -> dict | None:
     if not APIFY_TOKEN:
         return None
@@ -143,7 +175,7 @@ def _apify_zillow_lookup(address: str) -> dict | None:
 
 @router.post("/property-lookup", response_model=LookupResponse)
 def property_lookup(req: LookupRequest):
-    geo = _nominatim_geocode(req.address)
+    geo = _nominatim_geocode(req.address) or _census_geocode(req.address)
     if not geo:
         return LookupResponse(source="not_found")
 
