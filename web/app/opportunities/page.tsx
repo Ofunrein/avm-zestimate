@@ -1,7 +1,7 @@
 import { getOpportunities } from "@/lib/api";
 import { OpportunityCard } from "@/components/OpportunityCard";
 
-export const revalidate = 3600;
+export const revalidate = 120;
 
 export default async function OpportunitiesPage() {
   let items;

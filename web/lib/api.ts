@@ -200,7 +200,7 @@ export async function getOpportunities(params?: {
   const url = new URL(`${API_BASE}/opportunities`);
   if (params?.limit)   url.searchParams.set("limit",   String(params.limit));
   if (params?.min_gap) url.searchParams.set("min_gap", String(params.min_gap));
-  const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
+  const res = await fetch(url.toString(), { next: { revalidate: 120 } });
   if (!res.ok) throw new Error("opportunities fetch failed");
   return res.json();
 }
